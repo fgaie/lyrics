@@ -108,7 +108,7 @@ pub fn currentSong(self: *Self) !Song {
     try self.send("currentsong\n", .{});
 
     const answer = try self.getAnswer();
-    errdefer self.freeLines(&answer);
+    errdefer answer.deinit();
     return Song{ .x = answer };
 }
 
@@ -252,6 +252,16 @@ pub fn status(self: *Self) !Status {
     try self.send("status\n", .{});
 
     const answer = try self.getAnswer();
-    errdefer self.freeLines(&answer);
+    errdefer answer.deinit();
     return Status{ .x = answer };
+}
+
+pub fn seekId(self: *Self, id: u64, time: u64) !void {
+    var f: f64 = @floatFromInt(time);
+    f /= @floatFromInt(std.time.ns_per_s);
+
+    try self.send("seekid {} {}\n", .{ id, f });
+
+    const answer = try self.getAnswer();
+    answer.deinit();
 }
